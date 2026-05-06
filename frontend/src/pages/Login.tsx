@@ -57,7 +57,16 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 ml-1">Password</label>
+            <div className="flex items-center justify-between ml-1 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Password</label>
+              <button 
+                type="button" 
+                onClick={() => alert('Password reset is not yet configured with an email server. Please contact your administrator.')}
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
             <input
               type="password"
               value={password}

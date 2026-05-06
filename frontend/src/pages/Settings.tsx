@@ -12,7 +12,6 @@ export default function Settings() {
   const [monthlyLimit, setMonthlyLimit] = useState('');
   const [profileName, setProfileName] = useState(user?.name || '');
   const [profileEmail, setProfileEmail] = useState(user?.email || '');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<{type: 'success' | 'error', message: string} | null>(null);
@@ -77,11 +76,9 @@ export default function Settings() {
     setStatus(null);
     try {
       await api.put('/auth/change-password', {
-        currentPassword,
         newPassword
       });
       setStatus({ type: 'success', message: 'Security protocols updated successfully.' });
-      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
@@ -260,16 +257,6 @@ export default function Settings() {
                </div>
                
                <form onSubmit={handleSecuritySave} className="space-y-6 max-w-sm">
-                  <div>
-                    <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1">Current Password</label>
-                    <input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-5 py-3.5 border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold"
-                      required
-                    />
-                  </div>
                   <div>
                     <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1">New Password</label>
                     <input

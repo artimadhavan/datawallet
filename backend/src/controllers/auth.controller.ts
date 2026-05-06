@@ -88,7 +88,7 @@ export const updateProfile = async (req: any, res: Response): Promise<void> => {
 export const changePassword = async (req: any, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
-    const { currentPassword, newPassword } = req.body;
+    const { newPassword } = req.body;
 
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized' });
@@ -98,12 +98,6 @@ export const changePassword = async (req: any, res: Response): Promise<void> => 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
-    if (!isMatch) {
-      res.status(400).json({ error: 'Current password is incorrect' });
       return;
     }
 
