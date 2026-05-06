@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+      - JWT_SECRET=your_super_secret_jwt_key
+    volumes:
+      - ./backend/dev.db:/app/dev.db
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Note: In production, you'd replace localhost with your actual domain or IP address
+        - VITE_API_URL=http://localhost:5002/api
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
