@@ -1,3 +1,9 @@
+databases:
+  - name: smart-expense-db
+    databaseName: smartexpense
+    user: smartexpense_user
+    plan: free
+
 services:
   # 1. The Node.js Backend Service
   - type: web
@@ -5,18 +11,17 @@ services:
     env: node
     plan: free
     rootDir: backend
-    buildCommand: npm install --include=dev && npx prisma generate && npm run build
+    buildCommand: npm install --include=dev && npx prisma generate && npx prisma db push && npm run build
     startCommand: npm start
     envVars:
       - key: PORT
         value: 5002
       - key: JWT_SECRET
         generateValue: true
-      # IMPORTANT: Render's free tier deletes local files (like SQLite).
-      # If you don't care about losing data, leave the line below. 
-      # If you want to save data forever, create a Neon.tech database and replace this with your Neon URL.
       - key: DATABASE_URL
-        value: file:./dev.db
+        fromDatabase:
+          name: smart-expense-db
+          property: connectionString
 
   # 2. The React Frontend Static Site
   - type: web
