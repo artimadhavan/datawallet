@@ -3,6 +3,7 @@ services:
   - type: web
     name: smart-expense-backend
     env: node
+    plan: free
     rootDir: backend
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
