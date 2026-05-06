@@ -12,14 +12,20 @@ export default function Signup() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
     try {
       const response = await api.post('/auth/register', { name, email, password });
       login(response.data.token, response.data.user);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed');
+      setError(err.response?.data?.error || 'Signup failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,9 +81,10 @@ export default function Signup() {
           </div>
           <button
             type="submit"
-            className="w-full premium-button py-3 px-4 rounded-xl text-sm font-bold mt-2"
+            disabled={isLoading}
+            className="w-full premium-button py-3 px-4 rounded-xl text-sm font-bold mt-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
           >
-            Sign Up
+            {isLoading ? 'Creating Account (Waking Server)...' : 'Sign Up'}
           </button>
         </form>
 
