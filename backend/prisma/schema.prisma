@@ -27,6 +27,7 @@ model Expense {
   date          DateTime
   description   String
   paymentMethod String
+  billImageUrl  String?
   createdAt     DateTime @default(now())
 }
 

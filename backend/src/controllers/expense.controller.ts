@@ -235,3 +235,40 @@ export const uploadExpenses = async (req: AuthRequest, res: Response): Promise<v
     res.status(500).json({ error: 'Failed to upload and categorize expenses' });
   }
 };
+
+export const uploadBillImage = async (req: AuthRequest, res: Response): Promise<void> => {
+  const file = req.file;
+  const id = req.params.id as string;
+  const userId = req.user?.id;
+
+  try {
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    if (!file) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return;
+    }
+
+    const expense = await prisma.expense.findFirst({ where: { id, userId } });
+    if (!expense) {
+      fs.unlink(file.path, () => {});
+      res.status(404).json({ error: 'Expense not found' });
+      return;
+    }
+
+    const billImageUrl = `/uploads/${file.filename}`;
+
+    const updatedExpense = await prisma.expense.update({
+      where: { id },
+      data: { billImageUrl },
+    });
+
+    res.status(200).json(updatedExpense);
+  } catch (error) {
+    if (file?.path) fs.unlink(file.path, () => {});
+    res.status(500).json({ error: 'Failed to upload bill image' });
+  }
+};

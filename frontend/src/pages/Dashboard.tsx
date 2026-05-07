@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import {
   AlertTriangle, TrendingDown, Info, Download, CheckCircle,
-  PieChart as PieChartIcon, BarChart as BarChartIcon, Receipt
+  PieChart as PieChartIcon, BarChart as BarChartIcon, Receipt, Upload, Image as ImageIcon
 } from 'lucide-react';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
@@ -75,6 +75,26 @@ export default function Dashboard() {
       console.error('[Dashboard] Failed to fetch transactions:', err);
     }
   }, []);
+
+  const handleBillUpload = async (e: React.ChangeEvent<HTMLInputElement>, txId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post(`/expenses/${txId}/bill`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      fetchTransactions(txPage);
+    } catch (err) {
+      console.error('[Dashboard] Failed to upload bill:', err);
+    }
+  };
+
+  const getImageUrl = (path: string) => {
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+    return `${baseUrl}${path}`;
+  };
 
   // Re-fetch every time the dashboard is navigated to (catches post-upload refresh)
   useEffect(() => {
@@ -346,6 +366,7 @@ export default function Dashboard() {
                     <th className="text-left px-5 py-3.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Category</th>
                     <th className="text-left px-5 py-3.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Method</th>
                     <th className="text-right px-5 py-3.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Amount</th>
+                    <th className="text-center px-5 py-3.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Bill</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200/30 dark:divide-zinc-800/30">
@@ -371,6 +392,29 @@ export default function Dashboard() {
                       <td className="px-5 py-3.5 text-xs font-medium text-zinc-500">{tx.paymentMethod || '—'}</td>
                       <td className="px-5 py-3.5 text-right text-sm font-black text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
                         ₹{Number(tx.amount).toFixed(2)}
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        {tx.billImageUrl ? (
+                          <a
+                            href={getImageUrl(tx.billImageUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center p-1.5 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition-colors"
+                            title="View Bill"
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          <label className="inline-flex items-center justify-center p-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer" title="Upload Bill">
+                            <Upload className="w-4 h-4" />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleBillUpload(e, tx.id)}
+                            />
+                          </label>
+                        )}
                       </td>
                     </tr>
                   ))}

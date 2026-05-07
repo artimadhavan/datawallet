@@ -237,7 +237,7 @@ export default function Expenses() {
       {/* Transaction Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="glass-card w-full max-w-md p-8 shadow-2xl scale-in-95 animate-in duration-300">
+          <div className="glass-card w-full max-w-md p-8 shadow-2xl scale-in-95 animate-in duration-300 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-black tracking-tight mb-6 gradient-text">{isEditMode ? 'Modify Record' : 'Log New Transaction'}</h2>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
