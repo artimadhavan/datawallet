@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Plus, Trash2, Edit, Filter, ChevronLeft, ChevronRight, Search, Calendar, Wallet } from 'lucide-react';
+import { Plus, Trash2, Edit, Filter, ChevronLeft, ChevronRight, Search, Calendar, Wallet, Upload, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Expenses() {
@@ -52,6 +52,26 @@ export default function Expenses() {
         console.error('Failed to delete expense', error);
       }
     }
+  };
+
+  const handleBillUpload = async (e: React.ChangeEvent<HTMLInputElement>, txId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post(`/expenses/${txId}/bill`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      fetchExpenses();
+    } catch (err) {
+      console.error('Failed to upload bill:', err);
+    }
+  };
+
+  const getImageUrl = (path: string) => {
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+    return `${baseUrl}${path}`;
   };
 
   const openEditModal = (expense: any) => {
@@ -164,14 +184,15 @@ export default function Expenses() {
                 <th className="p-5">Category</th>
                 <th className="p-5">Method</th>
                 <th className="p-5 text-right">Amount</th>
+                <th className="p-5 text-center">Bill</th>
                 <th className="p-5 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200/50 dark:divide-zinc-800/50">
               {loading ? (
-                <tr><td colSpan={6} className="p-20 text-center"><div className="animate-pulse flex flex-col items-center"><div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mb-4" /> <span className="text-sm font-bold text-zinc-400">Syncing Ledger...</span></div></td></tr>
+                <tr><td colSpan={7} className="p-20 text-center"><div className="animate-pulse flex flex-col items-center"><div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mb-4" /> <span className="text-sm font-bold text-zinc-400">Syncing Ledger...</span></div></td></tr>
               ) : expenses.length === 0 ? (
-                <tr><td colSpan={6} className="p-20 text-center text-zinc-500"><Wallet className="w-12 h-12 mx-auto mb-4 opacity-10" /> <p className="text-sm font-bold">No records found matching your filters.</p></td></tr>
+                <tr><td colSpan={7} className="p-20 text-center text-zinc-500"><Wallet className="w-12 h-12 mx-auto mb-4 opacity-10" /> <p className="text-sm font-bold">No records found matching your filters.</p></td></tr>
               ) : (
                 expenses.map((expense) => (
                   <tr key={expense.id} className="hover:bg-zinc-50 dark:hover:bg-blue-500/5 transition-all group">
@@ -192,6 +213,29 @@ export default function Expenses() {
                     </td>
                     <td className="p-5 text-sm font-black text-right text-zinc-900 dark:text-zinc-100 tracking-tight">
                       ₹{expense.amount.toFixed(2)}
+                    </td>
+                    <td className="p-5 text-center">
+                      {expense.billImageUrl ? (
+                        <a
+                          href={getImageUrl(expense.billImageUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center p-1.5 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition-colors"
+                          title="View Bill"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                        </a>
+                      ) : (
+                        <label className="inline-flex items-center justify-center p-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer" title="Upload Bill">
+                          <Upload className="w-4 h-4" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleBillUpload(e, expense.id)}
+                          />
+                        </label>
+                      )}
                     </td>
                     <td className="p-5">
                       <div className="flex justify-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
